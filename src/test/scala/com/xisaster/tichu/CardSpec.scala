@@ -22,4 +22,10 @@ class CardSpec extends FunSpec{
     assert(Card(Jade,Two).sharesValue(Card(Phoenix)))
 
   }
+
+  it("can retrieve cards by their bit values"){
+    Card.allCards.foreach { x =>
+      assert(Card(x.bitValue) == x)
+    }
+  }
 }

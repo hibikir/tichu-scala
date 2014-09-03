@@ -2,27 +2,29 @@ package com.xisaster.tichu
 
 
 object Card {
-  //this could be precalculated to avoid having a mutable map
-  private val cache = scala.collection.mutable.Map[(Suit,CardValue), Card]()
+
+   val allCards : List[Card]= {
+    val cards = for (value <- CardValue.Suited;
+                     suit <- Suit.values) yield new SuitedCard(suit, value)
+    val special = for (value <- CardValue.Special) yield new SpecialCard(value)
+    cards:::special
+  }
+
+  private val cache =allCards.groupBy {
+    case x: SuitedCard => (x.suit, x.value)
+    case x: SpecialCard => (null, x.value)
+  }.mapValues(_.head)
+
+  private val bitCache =allCards.groupBy(_.bitValue).mapValues(_.head)
+
+  def apply(bitValue:Long):Card = bitCache.get(bitValue).get
 
   def apply(suit: Suit, value: SuitedValue): Card = {
-    cache.get((suit, value)) match {
-      case Some(x) => x
-      case _ =>
-        val card = new SuitedCard(suit, value)
-        cache.put((card.suit,card.value),card)
-        card
-    }
+    cache.get((suit, value)).get
   }
 
   def apply(value: SpecialValue): Card = {
-    cache.get((null, value)) match {
-      case Some(x) => x
-      case _ =>
-        val card = new SpecialCard(value)
-        cache.put((null,card.value),card)
-        card
-    }
+    cache.get((null, value)).get
   }
 }
 
